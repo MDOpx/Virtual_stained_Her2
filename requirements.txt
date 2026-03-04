@@ -1,0 +1,26 @@
+# Core dependencies (PyTorch and torchvision are already in Docker image)
+scipy
+Pillow
+opencv-python-headless 
+dominate
+packaging
+GPUtil
+visdom
+
+# Additional dependencies found in code
+scikit-image
+pytorch-fid
+beautifulsoup4
+requests
+matplotlib
+
+scikit-learn
+
+pandas
+openpyxl
+
+# Image quality metrics
+lpips
+piq
+seaborn
+timm

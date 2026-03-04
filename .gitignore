@@ -1,0 +1,32 @@
+# Virtual_stained_Her2 – exclude from repo (do not push)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Data & checkpoints (download separately)
+ckpt/
+datasets/
+models_train/
+
+# Results (generated at run time)
+results/
+
+# Recon – not needed for inference repo
+recon/environment.yml
+recon/README.md
+recon/gitignore
+recon/__int__.py
+recon/__int__ copy.py
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*~
