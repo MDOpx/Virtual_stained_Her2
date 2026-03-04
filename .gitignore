@@ -11,11 +11,17 @@ build/
 
 # Data & checkpoints (download separately)
 ckpt/
-datasets/
 models_train/
 
-# Results (generated at run time)
-results/
+# Datasets: ignore full data, keep sample (e.g. 4 PNGs in valA, valB)
+datasets/*
+!datasets/BCI_HER2_sample/
+!datasets/BCI_HER2_sample/**
+
+# Results: ignore other runs, keep sample reconstruction (e.g. 4 PNGs)
+results/*
+!results/reconstruction/
+!results/reconstruction/**
 
 # Recon – not needed for inference repo
 recon/environment.yml
