@@ -1,6 +1,6 @@
-# Inference Pipeline (Reconstruction + Classification)
+# Inference Pipeline (Stain2Stain + Classification)
 
-Run reconstruction and classification. 
+Run stain-to-stain translation and classification.
 
 ---
 
@@ -29,12 +29,12 @@ pip install -r requirements.txt
 
 ### Sample data (try without full download)
 
-The repo includes a **sample dataset** and **sample reconstruction results** so you can run the pipeline without downloading the full BCI dataset.
+The repo includes a **sample dataset** and **sample stain2stain results** so you can run the pipeline without downloading the full BCI dataset.
 
-- **`datasets/BCI_HER2_sample/`** — small sample with `valA` and `valB` (HE and IHC pairs). Use this to run reconstruction and classification locally.
-- **`results/reconstruction/`** — pre-run reconstruction outputs (fake_B images) on the sample. With this and the sample data, you can run **classification only** without running reconstruction.
+- **`datasets/BCI_HER2_sample/`** — small sample with `valA` and `valB` (HE and IHC pairs). Use this to run stain2stain and classification locally.
+- **`results/stain2stain/`** — pre-run stain2stain outputs (fake_B images) on the sample. With this and the sample data, you can run **classification only** without running stain2stain.
 
-You can try the full pipeline (recon → classification) on the sample, or run classification directly using the provided sample + sample reconstruction results.
+You can try the full pipeline (stain2stain → classification) on the sample, or run classification directly using the provided sample + sample stain2stain results.
 
 ### Full dataset (paper reproduction)
 
@@ -72,22 +72,22 @@ Pre-trained weights are provided separately.
   ```
   workspace/
   └── ckpt/
-      ├── reconstruction/   
+      ├── stain2stain/   
       └── classification/ 
   ```
 
 **Required for inference**
 
 | Step | Required files |
-|------|-----------------|
-| **Reconstruction** | `ckpt/reconstruction/latest_net_G.pth` |
+|------|----------------|
+| **Stain2Stain** | `ckpt/stain2stain/latest_net_G.pth` |
 | **Classification** | `ckpt/classification/fold_<i>/checkpoints/best.pth` |
 
 ---
 
-## 3. Reconstruction and Classification
+## 3. Stain2Stain and Classification
 
-### Reconstruction
+### Stain2Stain
 
 - **Role**: Image-to-image translation (e.g. HE → IHC) using a CPT (Contrastive Paired Translation) model.
 - **Input**: Pairs from `valA` and `valB` under the dataroot.
@@ -95,7 +95,7 @@ Pre-trained weights are provided separately.
 - **Run** (from `workspace`). For the sample dataset use `--dataroot datasets/BCI_HER2_sample`; for the full dataset use `--dataroot datasets/BCI_HER2`:
 
   ```bash
-  python recon/test.py --dataroot datasets/BCI_HER2_sample --name reconstruction --checkpoints_dir ckpt --results_dir results/reconstruction --model cpt --CUT_mode CUT --gpu_ids 0 --netD n_layers --ndf 32 --netG resnet_9blocks --n_layers_D 5 --normG instance --normD instance --weight_norm spectral --lambda_GAN 1.0 --lambda_NCE 10.0 --nce_layers 0,4,8,12,16 --nce_T 0.07 --num_patches 256 --lambda_style 100.0 --lambda_content 1.0 --lambda_gp 10.0 --gp_weights '[0.015625,0.03125,0.0625,0.125,0.25,1.0]' --lambda_asp 10.0 --asp_loss_mode lambda_linear --use_simsiam True --use_clsA 0 --use_clsB 1 --use_clsfB 1 --lambda_cls 10.0 --cls_content False --lambda_discls 0.1 --dataset_mode aligned --direction AtoB --num_threads 2 --batch_size 1 --load_size 1024 --crop_size 1024 --preprocess crop --flip_equivariance False --display_winsize 512 --phase val --num_test 10000 --epoch latest
+  python stain2stain/test.py --dataroot datasets/BCI_HER2_sample --name stain2stain --checkpoints_dir ckpt --results_dir results/stain2stain --model cpt --CUT_mode CUT --gpu_ids 0 --netD n_layers --ndf 32 --netG resnet_9blocks --n_layers_D 5 --normG instance --normD instance --weight_norm spectral --lambda_GAN 1.0 --lambda_NCE 10.0 --nce_layers 0,4,8,12,16 --nce_T 0.07 --num_patches 256 --lambda_style 100.0 --lambda_content 1.0 --lambda_gp 10.0 --gp_weights '[0.015625,0.03125,0.0625,0.125,0.25,1.0]' --lambda_asp 10.0 --asp_loss_mode lambda_linear --use_simsiam True --use_clsA 0 --use_clsB 1 --use_clsfB 1 --lambda_cls 10.0 --cls_content False --lambda_discls 0.1 --dataset_mode aligned --direction AtoB --num_threads 2 --batch_size 1 --load_size 1024 --crop_size 1024 --preprocess crop --flip_equivariance False --display_winsize 512 --phase val --num_test 10000 --epoch latest
   ```
 
 ### Classification
@@ -104,16 +104,16 @@ Pre-trained weights are provided separately.
 - **Input**: Either a single data root with `valA`/`predB`-style subfolders, or separate roots for A and B via `--data_root_A` and `--data_root_B`.
 - **Output**: Predictions and metrics under `--output_dir` (e.g. `predictions.json`, `metrics.json`, confusion matrix plot).
 
-**Using sample data (no download):** With the included `datasets/BCI_HER2_sample` and `results/reconstruction`, you can run classification without downloading the full dataset:
+**Using sample data (no download):** With the included `datasets/BCI_HER2_sample` and `results/stain2stain`, you can run classification without downloading the full dataset:
 
   ```bash
-  python classification/test.py --ckpt_dir ckpt/classification --output_dir results/classification --data_root_A datasets/BCI_HER2_sample/valA --data_root_B results/reconstruction --mode AB --fold all
+  python classification/test.py --ckpt_dir ckpt/classification --output_dir results/classification --data_root_A datasets/BCI_HER2_sample/valA --data_root_B results/stain2stain --mode AB --fold all
   ```
 
 **Using full data (paper reproduction):** For numbers reported in the paper, use the full test set:
 
   ```bash
-  python classification/test.py --ckpt_dir ckpt/classification --output_dir results/classification --data_root_A datasets/BCI_HER2/valA --data_root_B results/reconstruction --mode AB --fold all
+  python classification/test.py --ckpt_dir ckpt/classification --output_dir results/classification --data_root_A datasets/BCI_HER2/valA --data_root_B results/stain2stain --mode AB --fold all
   ```
 
 ---
@@ -124,11 +124,11 @@ All outputs are written under the paths you pass to the scripts (defaults below)
 
 | Step            | Output directory (example)   | Contents |
 |----------------|-----------------------------|----------|
-| Reconstruction | `results/reconstruction/`   | `*.png` (fake_B images only), one per input. |
+| Stain2Stain | `results/stain2stain/`   | `*.png` (fake_B images only), one per input. |
 | Classification | `results/classification/`  | `predictions.json`, `metrics.json`, `confusion_matrix.png`, and per-sample visualizations (e.g. `*_test_*.png`). |
 
-- **Included in the repo:** `results/reconstruction/` contains sample reconstruction results on `BCI_HER2_sample`, so you can run classification without running reconstruction first.
-- Use a different run name by changing the result folder (e.g. `results/A/recon`) to avoid overwriting previous runs.
-- Reconstruction writes **only** the generated images (fake_B) into the given `--results_dir`, with no extra subfolders.
+- **Included in the repo:** `results/stain2stain/` contains sample stain2stain results on `BCI_HER2_sample`, so you can run classification without running stain2stain first.
+- Use a different run name by changing the result folder (e.g. `results/A/stain2stain`) to avoid overwriting previous runs.
+- Stain2Stain writes **only** the generated images (fake_B) into the given `--results_dir`, with no extra subfolders.
 
-**Reproducibility:** Results in the paper are reported on the full test set. To reproduce them, download the full BCI test data and run reconstruction and classification on `datasets/BCI_HER2` (see §1).
+**Reproducibility:** Results in the paper are reported on the full test set. To reproduce them, download the full BCI test data and run stain2stain and classification on `datasets/BCI_HER2` (see §1).

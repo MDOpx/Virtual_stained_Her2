@@ -18,17 +18,17 @@ datasets/*
 !datasets/BCI_HER2_sample/
 !datasets/BCI_HER2_sample/**
 
-# Results: ignore other runs, keep sample reconstruction (e.g. 4 PNGs)
+# Results: ignore other runs, keep sample stain2stain (e.g. 4 PNGs)
 results/*
-!results/reconstruction/
-!results/reconstruction/**
+!results/stain2stain/
+!results/stain2stain/**
 
-# Recon – not needed for inference repo
-recon/environment.yml
-recon/README.md
-recon/gitignore
-recon/__int__.py
-recon/__int__ copy.py
+# Stain2stain – not needed in repo (legacy)
+stain2stain/environment.yml
+stain2stain/README.md
+stain2stain/gitignore
+stain2stain/__int__.py
+stain2stain/__int__ copy.py
 
 # IDE / OS
 .idea/

@@ -5,7 +5,14 @@ Uses --model cpt and --dataset_mode aligned. See options/base_options.py and
 options/test_options.py for options.
 """
 import os
+import sys
 import torch
+
+# Run from repo root: python stain2stain/test.py ...
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+if _script_dir not in sys.path:
+    sys.path.insert(0, _script_dir)
+
 from options.test_options import TestOptions
 from data import create_dataset
 from models import create_model

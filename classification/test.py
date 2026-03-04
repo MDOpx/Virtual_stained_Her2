@@ -70,7 +70,7 @@ def main():
     parser.add_argument('--data_root', type=str, default=None,
                         help='Dataset root (valA+valB or valA+predB). 생략 시 --data_root_A, --data_root_B 사용')
     parser.add_argument('--data_root_A', type=str, default=None, help='A 이미지 폴더 (예: valA 또는 원본 경로)')
-    parser.add_argument('--data_root_B', type=str, default=None, help='B 이미지 폴더 (예: recon 결과 fake_B 또는 valB)')
+    parser.add_argument('--data_root_B', type=str, default=None, help='B 이미지 폴더 (예: stain2stain 결과 fake_B 또는 valB)')
     parser.add_argument('--mode', type=str, choices=['A', 'B', 'AB'], default='AB')
     parser.add_argument('--is_pred', action='store_true', help='Use valA+predB (data_root 사용 시에만)')
     parser.add_argument('--fold', type=str, default='all', help='0-4 or all')
