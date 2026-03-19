@@ -33,7 +33,7 @@ def set_seed(seed):
         torch.backends.cudnn.benchmark = False
 
 
-def test(model, test_loader, device):
+def test(model, test_loader, device, mode):
     model.eval()
     all_preds, all_labels, all_paths = [], [], []
     with torch.no_grad():
@@ -44,7 +44,33 @@ def test(model, test_loader, device):
             _, predicted = torch.max(outputs.data, 1)
             all_preds.extend(predicted.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
-            all_paths.extend(paths)
+            # NOTE:
+            # MultiImageDataset returns paths as (pathA, pathB) per-sample.
+            # With PyTorch default collate, a batch of tuples gets collated into:
+            #   paths == (list_of_pathA, list_of_pathB)
+            # In that case, extending directly will corrupt alignment and
+            # can truncate later via zip(...).
+            batch_size = int(labels.shape[0])
+            if mode == 'AB':
+                # Expected collated structure: (pathA_list, pathB_list)
+                if isinstance(paths, (tuple, list)) and len(paths) == 2 and isinstance(paths[0], (list, tuple)) and isinstance(paths[1], (list, tuple)):
+                    pathA_list, pathB_list = paths
+                    for i in range(batch_size):
+                        all_paths.append((pathA_list[i], pathB_list[i]))
+                else:
+                    # Fallback: already a list of (pathA, pathB)
+                    # (e.g., if a custom collate_fn is used)
+                    for i in range(batch_size):
+                        pathA, pathB = paths[i]
+                        all_paths.append((pathA, pathB))
+            else:
+                # Expected: a list[str] with length == batch_size
+                if isinstance(paths, (list, tuple)):
+                    # Ensure length matches the batch
+                    for i in range(batch_size):
+                        all_paths.append(paths[i])
+                else:
+                    all_paths.append(paths)
     return all_preds, all_labels, all_paths
 
 
@@ -195,14 +221,14 @@ def main():
         all_preds_list = []
         all_labels = all_paths = None
         for model in models:
-            preds, labels, paths = test(model, test_loader, device)
+            preds, labels, paths = test(model, test_loader, device, args.mode)
             all_preds_list.append(preds)
             if all_labels is None:
                 all_labels, all_paths = labels, paths
         all_preds = [Counter(preds[i] for preds in all_preds_list).most_common(1)[0][0] for i in range(len(all_preds_list[0]))]
         all_preds = np.array(all_preds)
     else:
-        all_preds, all_labels, all_paths = test(models[0], test_loader, device)
+        all_preds, all_labels, all_paths = test(models[0], test_loader, device, args.mode)
 
     accuracy = accuracy_score(all_labels, all_preds)
     class_names = ['0', '1+', '2+', '3+']
